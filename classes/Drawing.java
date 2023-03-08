@@ -1,31 +1,32 @@
 package classes;
 
-import java.util.List;
+import java.util.*;
 
 //Drawing - Розыгрыш призов
 
 public class Drawing {
     List<Prize> prizesToAward;   //Список призов которые надо вручить
-    List<Prize> prizesAwarded;   //Список призов врученных
+    List<PrizeAwarded> prizesAwarded;   //Список призов врученных
 
-    public Drawing(List<Prize> prizesToAward, List<Prize> prizesAwarded) {
+    public Drawing() {
+        this.prizesToAward = new LinkedList<>();
+        this.prizesAwarded = new LinkedList<>();
+    }
+
+    public List<Prize> getPrizesToAward() {
+        return prizesToAward;
+    }
+
+    public List<PrizeAwarded> getPrizesAwarded() {
+        return prizesAwarded;
+    }
+
+    public void setPrizesToAward(List<Prize> prizesToAward) {
         this.prizesToAward = prizesToAward;
+    }
+
+    public void setPrizesAwarded(List<PrizeAwarded> prizesAwarded) {
         this.prizesAwarded = prizesAwarded;
     }
 
-    public boolean GetNewPrize() {
-        //разыграть ещё один приз и поместить его в список prizesToAward
-
-        //обновить файл prizestoaward.csv
-
-        return false;
-    }
-
-    public boolean AwardPrizeToBuyer() {
-        //вручить приз его обладателю и поместить его в список prizesAwarded
-
-        //обновить файл prizesawarded.csv
-        
-        return false;
-    }
 }

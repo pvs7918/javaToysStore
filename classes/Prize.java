@@ -2,38 +2,40 @@ package classes;
 
 public class Prize {
     private int id;             //id приза
-    private int idBuyer;        //покупатель выигрывший приз
-    private int idToy;         //идентификатор призовой игрушки
+    private Buyer buyer;        //покупатель выигрывший приз
+    private Toy toy;         //идентификатор призовой игрушки
     
-    public Prize(int id, int idBuyer, int idToy) {
+    public Prize(int id, Buyer buyer, Toy toy) {
         this.id = id;
-        this.idBuyer = idBuyer;
-        this.idToy = idToy;
+        this.buyer = buyer;
+        this.toy = toy;
     }
 
     public int getId() {
         return id;
     }
 
-    public int getIdBuyer() {
-        return idBuyer;
+    public Buyer getBuyer() {
+        return buyer;
     }
 
-    public int getIdToy() {
-        return idToy;
+    public Toy getToy() {
+        return toy;
     }
 
-    public void setIdBuyer(int idBuyer) {
-        this.idBuyer = idBuyer;
+    public void setBuyer(Buyer buyer) {
+        this.buyer = buyer;
     }
 
-    public void setIdToy(int idToy) {
-        this.idToy = idToy;
+    public void setToy(Toy toy) {
+        this.toy = toy;
     }
 
     @Override
     public String toString() {
-        return "Prize [id=" + id + ", idBuyer=" + idBuyer + ", idToy=" + idToy + "]";
+        return "Prize: [id=" + id + ",\n" +
+                "Buyer=" + buyer.toString() + ",\n" +
+                "Toy=" + toy.toStringAsPrize() + "]\n***************";
     }
 
 }

@@ -35,13 +35,13 @@ public class ToysModel {
         try {
             FileWriter fr1 = new FileWriter(fnameToys);
             //записываем шапку таблицы
-            fr1.append("id;name;count;price;weight\n");
+            fr1.append("id|name|count|price|weight\n");
             //основная таблица
             for (Toy item : toys) {
-                fr1.append(item.getId() + ";" +
-                        item.getName() + ";" +
-                        item.getCount() + ";" +
-                        item.getPrice() + ";" +
+                fr1.append(item.getId() + "|" +
+                        item.getName() + "|" +
+                        item.getCount() + "|" +
+                        item.getPrice() + "|" +
                         item.getWeight() + "\n");
             }
             fr1.close();
@@ -67,7 +67,8 @@ public class ToysModel {
                 String curRow = scanner.nextLine();
                 if (i > 0) {
                     // расщепляем строку разделителем ; на поля
-                    String[] fields = curRow.split(";");
+                    //в regex | означает OR, поэтому его надо экранировать через \\
+                    String[] fields = curRow.split("\\|");
                     if (fields.length != 5) {
                         throw new Exception("В исходном файле ошибка в строке " + i 
                                     + ". Количество полей не равно 5.");
@@ -114,6 +115,14 @@ public class ToysModel {
         }
         return null;
     }
+/* 
+    public Toy getRandomToyByWeight() {
+        for (Toy item : toys) {
+            if (item.getId() == curToyId)
+                return item;
+        }
+        return null;
+    }*/
 
     @Override
     public String toString() {

@@ -1,5 +1,3 @@
-package view;
-
 import view.*;
 import classes.*;
 import model.*;
@@ -30,7 +28,7 @@ public class Menu {
                     setNewPos(getChoice());
                 }
             } else {
-                // делает выбранный пункт меню ="" откатываемся на предыдущую позицию меню
+                // откатываемся на предыдущую позицию меню
                 if (getPrevPos() != "") {
                     setNewPos(getPrevPos());
                 } else {
@@ -56,17 +54,20 @@ public class Menu {
                     case ("1"): // показать меню Покупатели
                         showBuyersMenu();
                         break;
+
                     case ("1,1"): // меню Покупатели - Показать таблицу
                         BuyersShowTableAll();
                         break;
+
                     case ("1,2"): // меню Покупатели - Добавить
-                        if (BuyerAddNew() == true) {
+                        if (BuyerAddNew()) {
                             BuyersShowTableAll();
                         } else {
                             setChoice("");
                             ShowNewChoice = false;
                         }
                         break;
+
                     case ("1,3"): // меню Покупатели - Редактировать
                         if (BuyerEdit()) {
                             BuyersShowTableAll();
@@ -75,6 +76,7 @@ public class Menu {
                             ShowNewChoice = false;
                         }
                         break;
+
                     case ("1,4"): // меню Покупатели - Удалить
                         if (BuyerDeleteById()) {
                             BuyersShowTableAll();
@@ -88,9 +90,11 @@ public class Menu {
                     case ("2"): // показать меню Игрушки
                         showToysMenu();
                         break;
+
                     case ("2,1"): // меню Игрушки - Показать таблицу
                         ToysShowTableAll();
                         break;
+
                     case ("2,2"): // меню Игрушки - Добавить игрушку
                         if (ToyAddNew() == true) {
                             ToysShowTableAll();
@@ -99,6 +103,7 @@ public class Menu {
                             ShowNewChoice = false;
                         }
                         break;
+
                     case ("2,3"): // меню Игрушки - Редактировать игрушку
                         if (ToyEdit()) {
                             ToysShowTableAll();
@@ -107,6 +112,7 @@ public class Menu {
                             ShowNewChoice = false;
                         }
                         break;
+
                     case ("2,4"): // меню Игрушки - Удалить игрушку
                         if (ToyDeleteById()) {
                             ToysShowTableAll();
@@ -116,17 +122,17 @@ public class Menu {
                         }
                         break;  
 
-
                     //меню Розыгрыш призов
                     case ("3"): // показать меню Розыгрыш призов
                         showDrawingMenu();
                         break;
+
                     case ("3,1"): // меню Розыгрыш призов - Показать разыгранные призы
-                        //PrizesToAwardShowAll();
+                        PrizesToAwardShowAll();
                         break;
 
                     case ("3,2"): // меню Розыгрыш призов - Разыграть следующий приз
-                        /*if (PrizeAddNew() == true) {
+                        /*if (PrizeAddNew()) {
                             PrizesToAwardShowAll();
                         } else {
                             setChoice("");
@@ -142,6 +148,7 @@ public class Menu {
                             ShowNewChoice = false;
                         }*/
                         break;
+
                     case ("3,4"): // меню Розыгрыш призов - Показать врученные призы
                         //PrizesAwardedShowAll();
                         break;
@@ -230,7 +237,8 @@ public class Menu {
         System.out.println("1. Показать таблицу разыгранных призов.");
         System.out.println("2. Разыграть следующий приз.");
         System.out.println("3. Отметить приз как врученный.");
-        System.out.println("4. Начать новый розыгрыш призов.");
+        System.out.println("4. Показать таблицу выданных призов.");
+        System.out.println("5. Начать новый розыгрыш призов.");
         System.out.println("0. Назад в Главное меню.");
         System.out.println("q. Выход.");
         setPrevPos(getNewPos());
@@ -517,14 +525,24 @@ public class Menu {
     }
 
     //методы для обработки меню - Розыгрыш призов
-    public boolean PrizesToAwardShowAll() {
-        return ShowNewChoice;
+    public void PrizesToAwardShowAll() {
+        //Показать разыгранные призы
+        DrawingModel drawingModel = new DrawingModel();
+        if (drawingModel.loadPrizesToAward()) {
+            drawingModel.ShowTablePrizesToAward();
+        }
+        ReturnToPrevPos(); // курсор меню возвращаем на предыдущее положение - "3"
+        showDrawingMenu();
+    }
 
+ 
+    /*public boolean PrizeAddNew() {
+        DrawingModel drawingModel = new DrawingModel();
+        drawingModel.PrizeAddNew();
+        return true;
     }
-    public boolean PrizeAddNew() {
-        return ShowNewChoice;
-        
-    }
+
+    
     public boolean PrizeSetAsAwarded() {
         return ShowNewChoice;
         
@@ -536,7 +554,7 @@ public class Menu {
     public boolean DrawingBeginNew() {
         return ShowNewChoice;
         
-    }
+    }*/
 
 
     public String getPrevPos() {

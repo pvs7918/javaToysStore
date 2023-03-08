@@ -35,12 +35,12 @@ public class BuyersModel {
         try {
             FileWriter fr1 = new FileWriter(fnameBuyers);
             //записываем шапку таблицы
-            fr1.append("id;fullName;checkNumber;phone\n");
+            fr1.append("id|fullName|checkNumber|phone\n");
             //основная таблица
             for (Buyer item : buyers) {
-                fr1.append(item.getId() + ";" +
-                        item.getFullName() + ";" +
-                        item.getCheckNumber() + ";" +
+                fr1.append(item.getId() + "|" +
+                        item.getFullName() + "|" +
+                        item.getCheckNumber() + "|" +
                         item.getPhone() + "\n");
             }
             fr1.close();
@@ -66,7 +66,8 @@ public class BuyersModel {
                 String curRow = scanner.nextLine();
                 if (i > 0) {
                     // расщепляем строку разделителем ; на поля
-                    String[] fields = curRow.split(";");
+                    //в regex | означает OR, поэтому его надо экранировать через \\
+                    String[] fields = curRow.split("\\|");
                     if (fields.length != 4) {
                         throw new Exception("В исходном файле ошибка в строке " + i 
                                     + ". Количество полей не равно 4.");
