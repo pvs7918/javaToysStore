@@ -119,6 +119,11 @@ public class ToysModel {
     public Toy getRandomToyByWeight() {
         // возвращает игрушку выбранную случайным образом с учетом веса
         
+        if (toys.size() == 0) {
+            System.out.println("Нет игрушек!");
+            return null;
+        }
+
         int SumWt = 0;
         List<Toy> selToys = new LinkedList<>();
         // 1. Делаем выборку игрушек количество которых > 0 и находим сумму их весов
@@ -127,6 +132,11 @@ public class ToysModel {
                 selToys.add(item);
                 SumWt += item.getWeight(); //сумма весов
             }
+        }
+
+        if (selToys.size() == 0) {
+            System.out.println("Игрушки для выдачи призов закончились!");
+            return null;
         }
 
         // 2. Берем случайное значение от 0 до TotalWt
