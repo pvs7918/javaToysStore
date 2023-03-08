@@ -1,10 +1,12 @@
 
+import view.*;
 
 public class Main {
-    public static void main(String[] args) {
-        // Создаем презентер и запускаем его
-        Presenter presenter = new Presenter();
-        presenter.run();
-    }
+    Menu menu;
 
+    public static void main(String[] args) {
+        //инициализация объекта меню
+        Menu menu = new Menu();
+        menu.run();
+    }
 }

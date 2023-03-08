@@ -13,10 +13,9 @@ public class ToysView {
 
     public void ShowTable() {
         //Вывести в консоль таблицу игрушек
-        System.out.println("Таблица игрушек\n---------------");
+        System.out.println("\nТаблица Игрушки\n---------------");
         for (Toy item : toys) {
             System.out.println(item.toString());
-            System.out.println("********************");
         }
     }
 

@@ -38,10 +38,27 @@ public class Toy {
         return weight;
     }
 
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+    public void setPrice(float price) {
+        this.price = price;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
     @Override
     public String toString() {
-        return "Toy [id=" + id + ", name=" + name + ", count=" + count + ", price=" + price + ", weight=" + weight
-                + "]";
+        return "[id=" + id + ", name=" + name + ", count=" + count + 
+                ", price=" + price + ", weight=" + weight + "]";
     }
    
 }
