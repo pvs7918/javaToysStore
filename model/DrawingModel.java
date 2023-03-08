@@ -2,18 +2,22 @@ package model;
 
 import classes.*;
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class DrawingModel {
     private String fnamePrizesToAward; // название файла - призы вручить
     private String fnamePrizesAwarded; // название файла - призы врученные
-    
-    Drawing drw;   //Данные о розыгрыше призов
+    DateTimeFormatter formatter; //формат даты времени
+    private Drawing drw;   //Данные о розыгрыше призов
 
     public DrawingModel() {
         fnamePrizesToAward = "./db/prizestoaward.csv";
         fnamePrizesAwarded = "./db/prizesawarded.csv";
         drw = new Drawing();
+        formatter = DateTimeFormatter.ofPattern(
+            "dd.MM.yyyy HH:mm");
     }
 
     public boolean loadPrizesToAward() {
@@ -26,7 +30,7 @@ public class DrawingModel {
             while (scanner.hasNextLine()) {
                 /*
                  * читаем строку исходного файла - первую строку пропускаем,
-                 * id|Buyer=id;fullName;checkNumber;phone|Toy=id;name;count;price;weight
+                 * id|Buyer=id;fullName;checkNumber;phone|Toy=id;name;price
                  * это шапка с названием полей
                  */
                 String curRow = scanner.nextLine();
@@ -67,20 +71,121 @@ public class DrawingModel {
         return true;
     }
 
+    public boolean loadPrizesAwarded() {
+        // загрузка списка из файла БД формата csv
+        
+        List<PrizeAwarded> prizesAwarded = new LinkedList<>();
+        // открываем и читаем данные из файла
+        try (FileReader fr = new FileReader(fnamePrizesAwarded)) {
+            Scanner scanner = new Scanner(fr);
+            int i = 0; // номер строки
+            while (scanner.hasNextLine()) {
+                /*
+                 * читаем строку исходного файла - первую строку пропускаем,
+                 * id|Buyer=id;fullName;checkNumber;phone|Toy=id;name;price|dateAward
+                 * это шапка с названием полей
+                 */
+                String curRow = scanner.nextLine();
+                if (i > 0) {
+                    // расщепляем строку разделителем ; на поля
+                    //в regex | означает OR, поэтому его надо экранировать через \\
+                    String[] fields = curRow.split("\\|");
+                    if (fields.length != 4) {
+                        throw new Exception("В исходном файле ошибка в строке " + i 
+                                    + ". Количество полей не равно 4.");
+                    }
+                    // парсим поля покупателя
+                    int curId = Integer.parseInt(fields[0].trim());
+                    String[] buFields = fields[1].trim().split(";");
+                    Buyer curBuyer = new Buyer(Integer.parseInt(buFields[0].trim()),
+                                                buFields[1].trim(),
+                                                buFields[2].trim(),
+                                                buFields[3].trim());
+                    String[] toFields = fields[2].trim().split(";");
+                    //count и weight в таблице призов не храним, поэтому ставим ниже 0,
+                    //чтобы воспользоваться методом Toy.ToStringAsPrize()
+                    Toy curToy = new Toy(Integer.parseInt(toFields[0].trim()),
+                                        toFields[1].trim(),
+                                        0,
+                                        Float.parseFloat(toFields[2].trim()),
+                                        0);
+                    
+                    LocalDateTime curDate = LocalDateTime.parse(fields[3].trim(), formatter);
+                    PrizeAwarded curPrize = new PrizeAwarded(curId, curBuyer, curToy, curDate);
+                    prizesAwarded.add(curPrize);
+                }
+                i++;
+            }
+            drw.setPrizesAwarded(prizesAwarded);
+            scanner.close();
+        } catch (Exception ex) {
+            System.out.println("Ошибка при загрузке таблицы-Призы врученные.\n" + ex.toString());
+            return false;
+        }
+        return true;
+    }
+
     public void ShowTablePrizesToAward() {
-        //Вывести в консоль таблицу игрушек
+        //Вывести в консоль таблицу-Разыгранные призы
         String s1 = "Таблица-Разыгранные призы";
         System.out.println("\n" + s1 + "\n" + "-".repeat(s1.length()));
         for (Prize item : drw.getPrizesToAward()) {
             System.out.println(item.toString());
         }
     }
- 
+
+    public void ShowTablePrizesAwarded() {
+        //Вывести в консоль таблицу-Врученные призы
+        String s1 = "Таблица-Врученные призы";
+        System.out.println("\n" + s1 + "\n" + "-".repeat(s1.length()));
+        for (PrizeAwarded item : drw.getPrizesAwarded()) {
+            System.out.println(item.toString());
+        }
+    }    
+    
+    public boolean PrizeToAwardSetAsAwarded(Prize curPrize, LocalDateTime curDate) {
+        //перевод curPrize из таблицы PrizesToAward в PrizesAwarded-вручение приза
+        int curID = curPrize.getId();
+        this.loadPrizesAwarded();
+        List<PrizeAwarded> prizesAwarded = drw.getPrizesAwarded();
+        int newId = getPrizesAwardedNewId();
+
+        PrizeAwarded newPrizeAwarded = new PrizeAwarded(newId,
+                                                    curPrize.getBuyer(),
+                                                    curPrize.getToy(),
+                                                    curDate);
+
+        //добавляем новый врученный приз к общему списку врученных призов
+        if (!prizesAwarded.add(newPrizeAwarded)) {
+            System.out.print("Ошибка при добавлении врученного приза!");
+            return false;
+        }
+
+        //удаляем разыгранный приз
+        List<Prize> prizesToAward = drw.getPrizesToAward();
+        for (Prize item : prizesToAward) {
+            if (item.getId() == curID) {
+                prizesToAward.remove(item);
+                break;
+            }
+        }
+
+        //сохраняем врученные призы
+        drw.setPrizesAwarded(prizesAwarded);
+        savePrizesAwarded();
+
+        // пересохраняем разыгранные призы
+        drw.setPrizesToAward(prizesToAward);
+        savePrizesToAward();
+
+        System.out.println("Успешно изменен статус приза на вручен. id врученного приза=" + newId + ".");    
+        return true;
+    }
+
     public boolean PrizesToAwardAddNew() {
         // Розыгрыш очередного приза
-        
+
         loadPrizesToAward(); //обновить данные по разыгранным призам
-        //List<Prize> PrizesToAward = drw.getPrizesToAward(); //список призов для вручения
 
         ToysModel toysModel = new ToysModel();
         if (!toysModel.load()) {
@@ -89,7 +194,7 @@ public class DrawingModel {
         //Получаем случайную игрушку с учетом веса и количества > 0
         Toy RandomToy = toysModel.getRandomToyByWeight();
         if (RandomToy == null) {
-            System.out.println("Ошибка. Приз не выбран!");
+            System.out.println("Ошибка. Игрушка для приза не выбрана!");
             return false;
         }
         
@@ -133,7 +238,6 @@ public class DrawingModel {
         //добавляем новый приз в таблицу призов для выдачи.
         drw.getPrizesToAward().add(newPrize);
         //сохраняем список в файл
-        //drw.setPrizesToAward(PrizesToAward);
         if (!savePrizesToAward()) {
             System.out.println("Ошибка при сохранении списка призов для вручения!");
             return false;
@@ -167,6 +271,26 @@ public class DrawingModel {
         }
     }
 
+    public boolean savePrizesAwarded() {
+        // сохранение списка в файл БД
+        try {
+            FileWriter fr1 = new FileWriter(fnamePrizesAwarded);
+            //записываем шапку таблицы
+            fr1.append("id|Buyer=id;fullName;checkNumber;phone|Toy=id;name;price|dateAward\n");
+            //основная таблица
+            for (PrizeAwarded item : drw.getPrizesAwarded()) {
+                fr1.append(item.getId() + "|" +
+                        item.getBuyer().toSavePrize() + "|" +
+                        item.getToy().toSavePrize() + "|" +
+                        item.getDateAwardString() + "\n");
+            }
+            fr1.close();
+            return true;
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+            return false;
+        }
+    }
 
     public int getPrizesToAwardNewId() {
         int maxId = -1;
@@ -186,43 +310,14 @@ public class DrawingModel {
         return maxId + 1;
     }
 
-    /* 
-   PrizesToAwardShowAll
-    PrizeSetAsAwarded
-    PrizesAwardedShowAll
-    DrawingBeginNew*/
-
-    /*public boolean deleteById(int curId) {
-        //удаление записи по идентификатору
-        for (Buyer item : buyers) {
-            if (item.getId() == curId) {
-                buyers.remove(item);
-                System.out.println("Покупатель с id=" + curId + " успешно удален.");
-                return true;
-            }
-        }
-        System.out.println("Покупатель с id=" + curId + " не найден. Удаление не выполнено!");
-        return false;
-    }
-
-    */
-
-    
-    // возврат полного списка студентов без фильтрации и доп.упорядочивания
-    /*public List<Buyer> getBuyersAll() {
-        return buyers;
-    }
-
-    
-
-    public Buyer getBuyerById(int curBuyerId) {
-        for (Buyer item : buyers) {
-            if (item.getId() == curBuyerId)
+    public Prize getPrizeToAwardById(int curPrizeId) {
+        for (Prize item : drw.getPrizesToAward()) {
+            if (item.getId() == curPrizeId)
                 return item;
         }
         return null;
     }
-
+/* 
     @Override
     public String toString() {
         String res = "";

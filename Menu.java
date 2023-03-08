@@ -2,6 +2,8 @@ import view.*;
 import classes.*;
 import model.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Menu {
@@ -11,6 +13,7 @@ public class Menu {
     private String newPos; // = prevPos + choice
     private boolean ShowNewChoice; // = признак необходимости показать ввод нового пункта меню
     private Scanner sc;
+    DateTimeFormatter formatter; //формат даты времени
 
     public void run() {
         showProgramGreeting();
@@ -35,7 +38,7 @@ public class Menu {
                     setNewPos("");
                 }
             }
-            //обработка общих случаев
+            // обработка общих случаев
             if (getChoice().equals("0")) {
                 // означает - Перейти в главное меню
                 showMainMenu();
@@ -44,13 +47,13 @@ public class Menu {
                 showProgramExit();
                 return;
             } else {
-            // Обработка конкретных пунктов меню в соответствии с новой позицией меню
+                // Обработка конкретных пунктов меню в соответствии с новой позицией меню
                 switch (getNewPos()) {
                     case (""): // главное меню
                         showMainMenu();
                         break;
-                    
-                    //меню Покупатели
+
+                    // меню Покупатели
                     case ("1"): // показать меню Покупатели
                         showBuyersMenu();
                         break;
@@ -84,9 +87,9 @@ public class Menu {
                             setChoice("");
                             ShowNewChoice = false;
                         }
-                        break; 
-                    
-                    //меню Игрушки
+                        break;
+
+                    // меню Игрушки
                     case ("2"): // показать меню Игрушки
                         showToysMenu();
                         break;
@@ -120,20 +123,22 @@ public class Menu {
                             setChoice("");
                             ShowNewChoice = false;
                         }
-                        break;  
+                        break;
 
-                    //меню Розыгрыш призов
+                    // меню Розыгрыш призов
                     case ("3"): // показать меню Розыгрыш призов
                         showDrawingMenu();
                         break;
 
                     case ("3,1"): // меню Розыгрыш призов - Показать разыгранные призы
                         PrizesToAwardShowAll();
+                        showDrawingMenu();
                         break;
 
                     case ("3,2"): // меню Розыгрыш призов - Разыграть следующий приз
                         if (PrizeAddNew()) {
                             PrizesToAwardShowAll();
+                            showDrawingMenu();
                         } else {
                             setChoice("");
                             ShowNewChoice = false;
@@ -141,25 +146,17 @@ public class Menu {
                         break;
 
                     case ("3,3"): // меню Розыгрыш призов - Отметить приз как врученный
-                        /*if (PrizeSetAsAwarded()) {
+                        if (PrizeSetAsAwarded()) {
                             PrizesAwardedShowAll();
                         } else {
                             setChoice("");
                             ShowNewChoice = false;
-                        }*/
+                        }
                         break;
 
                     case ("3,4"): // меню Розыгрыш призов - Показать врученные призы
-                        //PrizesAwardedShowAll();
+                        PrizesAwardedShowAll();
                         break;
-                        
-                    case ("3,5"): // меню Розыгрыш призов - Начать новый розыгрыш призов
-                        /*if (!DrawingBeginNew()) {
-                            setChoice("");
-                            ShowNewChoice = false;
-                        }*/
-                        break;
-
 
                     default:
                         showMenuItemNotFound();
@@ -170,10 +167,10 @@ public class Menu {
                         break;
                 }
             }
-            //для отладки
-            //System.out.println("Отладка. Текущая позиция меню: " + getNewPos());
+            // для отладки
+            // System.out.println("Отладка. Текущая позиция меню: " + getNewPos());
 
-            if (ShowNewChoice){
+            if (ShowNewChoice) {
                 // Считываем новый выбранный пункт меню - Choice
                 System.out.printf("Укажите пункт меню: ");
                 try {
@@ -238,11 +235,10 @@ public class Menu {
         System.out.println("2. Разыграть следующий приз.");
         System.out.println("3. Отметить приз как врученный.");
         System.out.println("4. Показать таблицу-Врученные призы.");
-        System.out.println("5. Начать новый розыгрыш призов.");
         System.out.println("0. Назад в Главное меню.");
         System.out.println("q. Выход.");
         setPrevPos(getNewPos());
-    }    
+    }
 
     public void showProgramExit() {
         // показать заголовок программы
@@ -254,7 +250,7 @@ public class Menu {
         System.out.println("Не найден обработчик для указанного пункта меню.");
     }
 
-    //методы для обработки меню - Покупатели
+    // методы для обработки меню - Покупатели
 
     public void BuyersShowTableAll() {
         // Создаем объект Модель - она содержит коллекцию объектов нужного типа
@@ -292,7 +288,7 @@ public class Menu {
             System.out.print("Номер телефона: ");
             String curPhone = sc.nextLine();
             Buyer curBuyer = new Buyer(curId, curFullName, curCheckNumber,
-                                curPhone);
+                    curPhone);
             buyersModel.add(curBuyer);
         } catch (Exception ex) {
             System.out.println("Ошибка при вводе данных о покупателе.\n" + ex.toString());
@@ -312,7 +308,7 @@ public class Menu {
         // Удаление игрушки
         // загружаем данные в модель из файла
 
-        //Показываем список игрушек для выбора id для удаления
+        // Показываем список игрушек для выбора id для удаления
         BuyersModel buyersModel = new BuyersModel();
         if (buyersModel.load()) {
             BuyersView buyersView = new BuyersView(buyersModel.getBuyersAll());
@@ -321,9 +317,9 @@ public class Menu {
         System.out.print("\nВведите id удаляемого покупателя: ");
         try {
             int curId = Integer.parseInt(sc.nextLine());
-            //удаляем запись
+            // удаляем запись
             if (buyersModel.deleteById(curId)) {
-                //сохраняем данные в файл
+                // сохраняем данные в файл
                 buyersModel.save();
                 return true;
             }
@@ -337,7 +333,7 @@ public class Menu {
     public boolean BuyerEdit() {
         // Редактирование игрушки
         Buyer editedBuyer;
-        //Показываем список игрушек для выбора id для редактирования
+        // Показываем список игрушек для выбора id для редактирования
         BuyersModel buyersModel = new BuyersModel();
         if (buyersModel.load()) {
             BuyersView buyersView = new BuyersView(buyersModel.getBuyersAll());
@@ -349,29 +345,29 @@ public class Menu {
             editedBuyer = buyersModel.getBuyerById(curId);
             String curValue;
             System.out.println("Введите новые значения полей (Enter - оставить прежнее значение).");
-            //Получаем новые значения полей
-            System.out.print("ФИО (прежнее значение): " + 
-            editedBuyer.getFullName() +
-                            "\nНовое значение: ");
+            // Получаем новые значения полей
+            System.out.print("ФИО (прежнее значение): " +
+                    editedBuyer.getFullName() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedBuyer.setFullName(curValue);
 
-            System.out.print("Номер чека (прежнее значение): " + 
-            editedBuyer.getCheckNumber() +
-                            "\nНовое значение: ");
+            System.out.print("Номер чека (прежнее значение): " +
+                    editedBuyer.getCheckNumber() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedBuyer.setCheckNumber(curValue);
 
-            System.out.print("Номер телефона (прежнее значение): " + 
-                editedBuyer.getPhone() +
-                            "\nНовое значение: ");
+            System.out.print("Номер телефона (прежнее значение): " +
+                    editedBuyer.getPhone() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedBuyer.setPhone(curValue);
-                       
-            //сохраняем данные в файл
+
+            // сохраняем данные в файл
             if (buyersModel.save()) {
                 System.out.println("Данные покупателя с id=" + curId + " успешно отредактированы.");
                 return true;
@@ -384,8 +380,7 @@ public class Menu {
         return false;
     }
 
-
-    //методы для обработки меню - Игрушки
+    // методы для обработки меню - Игрушки
     public void ToysShowTableAll() {
         // Создаем объект Модель - она содержит коллекцию объектов нужного типа
         // позволяет загружать, сохранять и вносить изменения в коллекцию
@@ -445,7 +440,7 @@ public class Menu {
         // Удаление игрушки
         // загружаем данные в модель из файла
 
-        //Показываем список игрушек для выбора id для удаления
+        // Показываем список игрушек для выбора id для удаления
         ToysModel toysModel = new ToysModel();
         if (toysModel.load()) {
             ToysView toysView = new ToysView(toysModel.getToysAll());
@@ -454,9 +449,9 @@ public class Menu {
         System.out.print("\nВведите id удаляемой игрушки: ");
         try {
             int curId = Integer.parseInt(sc.nextLine());
-            //удаляем запись
+            // удаляем запись
             if (toysModel.deleteById(curId)) {
-                //сохраняем данные в файл
+                // сохраняем данные в файл
                 toysModel.save();
                 return true;
             }
@@ -470,7 +465,7 @@ public class Menu {
     public boolean ToyEdit() {
         // Редактирование игрушки
         Toy editedToy;
-        //Показываем список игрушек для выбора id для редактирования
+        // Показываем список игрушек для выбора id для редактирования
         ToysModel toysModel = new ToysModel();
         if (toysModel.load()) {
             ToysView toysView = new ToysView(toysModel.getToysAll());
@@ -482,36 +477,36 @@ public class Menu {
             editedToy = toysModel.getToyById(curId);
             String curValue;
             System.out.println("Введите новые значения полей (Enter - оставить прежнее значение).");
-            //Получаем новые значения полей
-            System.out.print("Название (прежнее значение): " + 
-                            editedToy.getName() +
-                            "\nНовое значение: ");
+            // Получаем новые значения полей
+            System.out.print("Название (прежнее значение): " +
+                    editedToy.getName() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedToy.setName(curValue);
 
-            System.out.print("Количество (прежнее значение): " + 
-                            editedToy.getCount() +
-                            "\nНовое значение: ");
+            System.out.print("Количество (прежнее значение): " +
+                    editedToy.getCount() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedToy.setCount(Integer.parseInt(curValue));
 
-            System.out.print("Цена (прежнее значение): " + 
-                            editedToy.getPrice() +
-                            "\nНовое значение: ");
+            System.out.print("Цена (прежнее значение): " +
+                    editedToy.getPrice() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedToy.setPrice(Float.parseFloat(curValue));
 
-            System.out.print("Вес (прежнее значение): " + 
-                            editedToy.getWeight() +
-                            "\nНовое значение: ");
+            System.out.print("Вес (прежнее значение): " +
+                    editedToy.getWeight() +
+                    "\nНовое значение: ");
             curValue = sc.nextLine();
             if (!curValue.equals(""))
                 editedToy.setWeight(Integer.parseInt(curValue));
-            
-            //сохраняем данные в файл
+
+            // сохраняем данные в файл
             if (toysModel.save()) {
                 System.out.println("Игрушка с id=" + curId + " успешно отредактирована.");
                 return true;
@@ -524,18 +519,17 @@ public class Menu {
         return false;
     }
 
-    //методы для обработки меню - Розыгрыш призов
+    // методы для обработки меню - Розыгрыш призов
     public void PrizesToAwardShowAll() {
-        //Показать разыгранные призы
+        // Показать разыгранные призы
         DrawingModel drawingModel = new DrawingModel();
         if (drawingModel.loadPrizesToAward()) {
             drawingModel.ShowTablePrizesToAward();
         }
-        ReturnToPrevPos(); // курсор меню возвращаем на предыдущее положение - "3"
-        showDrawingMenu();
+        ReturnToPrevPos(); // курсор меню возвращаем на предыдущее положение
+        
     }
 
- 
     public boolean PrizeAddNew() {
         DrawingModel drawingModel = new DrawingModel();
         if (drawingModel.PrizesToAwardAddNew())
@@ -543,20 +537,62 @@ public class Menu {
         return false;
     }
 
-    /* 
-    public boolean PrizeSetAsAwarded() {
-        return ShowNewChoice;
-        
+    public void PrizesAwardedShowAll() {
+        // Показать разыгранные призы
+        DrawingModel drawingModel = new DrawingModel();
+        if (drawingModel.loadPrizesAwarded()) {
+            drawingModel.ShowTablePrizesAwarded();
+        }
+        ReturnToPrevPos(); // курсор меню возвращаем на предыдущее положение
+        showDrawingMenu();
     }
-    public boolean PrizesAwardedShowAll() {
-        return ShowNewChoice;
-        
-    }
-    public boolean DrawingBeginNew() {
-        return ShowNewChoice;
-        
-    }*/
 
+    public boolean PrizeSetAsAwarded() {
+            // Установка признака что приз выдан
+
+            // показать все разыгранные призы, для выбора ID
+            PrizesToAwardShowAll();
+            System.out.print("Введите id разыгранного приза, для смены статуса на Вручен: ");
+            try {
+                int curId = Integer.parseInt(sc.nextLine());
+
+                System.out.print("Введите дату, время вручения (Enter - текущая. пример: 06.07.2023 15:10): ");
+                String curValue = sc.nextLine();
+                LocalDateTime curDate;
+                if (curValue.equals("")) {
+                    curDate = LocalDateTime.now();
+                } else {
+                    curDate = LocalDateTime.parse(sc.nextLine(),formatter);
+                }
+
+                DrawingModel drawingModel = new DrawingModel();
+                //загружаем список разыгранных призов
+                if (!drawingModel.loadPrizesToAward()) {
+                    System.out.print("Ошибка при загрузке списка разыгранных призов!");
+                    return false;
+                }
+                //находим выбранный приз
+                Prize curPrize = drawingModel.getPrizeToAwardById(curId);
+                //переводим приз в другую таблицу
+                if (drawingModel.PrizeToAwardSetAsAwarded(curPrize, curDate)) {
+                    
+                    return true;
+                }
+            } catch (Exception ex) {
+                System.out.println("Ошибка при редактировании игрушки.\n" + ex.toString());
+                return false;
+            }
+        // выводим выданные призы с указанием id добавленной записи
+
+        return false;
+    }
+
+    /*
+     * public boolean DrawingBeginNew() {
+     * return ShowNewChoice;
+     * 
+     * }
+     */
 
     public String getPrevPos() {
         return prevPos;
@@ -597,5 +633,7 @@ public class Menu {
         prevPos = "";
         choice = "";
         newPos = "";
+        formatter = DateTimeFormatter.ofPattern(
+            "dd.MM.yyyy HH:mm");
     }
 }
