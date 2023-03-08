@@ -11,14 +11,14 @@ public class ToysModel {
     public ToysModel() {
         fnameToys = "./db/toys.csv";
     }
-    
+
     public void add(Toy rec) {
         // добавление новой записи в список toys
         toys.add(rec);
     }
-    
+
     public boolean deleteById(int curId) {
-        //удаление записи по идентификатору
+        // удаление записи по идентификатору
         for (Toy item : toys) {
             if (item.getId() == curId) {
                 toys.remove(item);
@@ -34,9 +34,9 @@ public class ToysModel {
         // сохранение списка в файл БД
         try {
             FileWriter fr1 = new FileWriter(fnameToys);
-            //записываем шапку таблицы
+            // записываем шапку таблицы
             fr1.append("id|name|count|price|weight\n");
-            //основная таблица
+            // основная таблица
             for (Toy item : toys) {
                 fr1.append(item.getId() + "|" +
                         item.getName() + "|" +
@@ -67,11 +67,11 @@ public class ToysModel {
                 String curRow = scanner.nextLine();
                 if (i > 0) {
                     // расщепляем строку разделителем ; на поля
-                    //в regex | означает OR, поэтому его надо экранировать через \\
+                    // в regex | означает OR, поэтому его надо экранировать через \\
                     String[] fields = curRow.split("\\|");
                     if (fields.length != 5) {
-                        throw new Exception("В исходном файле ошибка в строке " + i 
-                                    + ". Количество полей не равно 5.");
+                        throw new Exception("В исходном файле ошибка в строке " + i
+                                + ". Количество полей не равно 5.");
                     }
                     // парсим поля
                     int curId = Integer.parseInt(fields[0].trim());
@@ -115,14 +115,33 @@ public class ToysModel {
         }
         return null;
     }
-/* 
+
     public Toy getRandomToyByWeight() {
+        // возвращает игрушку выбранную случайным образом с учетом веса
+        
+        int SumWt = 0;
+        List<Toy> selToys = new LinkedList<>();
+        // 1. Делаем выборку игрушек количество которых > 0 и находим сумму их весов
         for (Toy item : toys) {
-            if (item.getId() == curToyId)
+            if (item.getCount() > 0) {
+                selToys.add(item);
+                SumWt += item.getWeight(); //сумма весов
+            }
+        }
+
+        // 2. Берем случайное значение от 0 до TotalWt
+        // вес случайный от 0 до TotalWt
+        int RndWt = new Random().nextInt(SumWt + 1);
+        // 3. Ищем элемент, который попал под это значение
+        SumWt=0; //текущая сумма весов
+        for (Toy item : selToys) {
+            SumWt += item.getWeight(); //сумма весов от 0 до текущего элемента
+            if (SumWt >= RndWt) {
                 return item;
+            }
         }
         return null;
-    }*/
+    }
 
     @Override
     public String toString() {

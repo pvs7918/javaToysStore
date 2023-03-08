@@ -132,12 +132,12 @@ public class Menu {
                         break;
 
                     case ("3,2"): // меню Розыгрыш призов - Разыграть следующий приз
-                        /*if (PrizeAddNew()) {
+                        if (PrizeAddNew()) {
                             PrizesToAwardShowAll();
                         } else {
                             setChoice("");
                             ShowNewChoice = false;
-                        }*/
+                        }
                         break;
 
                     case ("3,3"): // меню Розыгрыш призов - Отметить приз как врученный
@@ -234,10 +234,10 @@ public class Menu {
     public void showDrawingMenu() {
         // показать меню Розыгрыш призов в консоли
         System.out.println("\nМеню-Розыгрыш призов\n----------------");
-        System.out.println("1. Показать таблицу разыгранных призов.");
+        System.out.println("1. Показать таблицу-Разыгранные призы.");
         System.out.println("2. Разыграть следующий приз.");
         System.out.println("3. Отметить приз как врученный.");
-        System.out.println("4. Показать таблицу выданных призов.");
+        System.out.println("4. Показать таблицу-Врученные призы.");
         System.out.println("5. Начать новый розыгрыш призов.");
         System.out.println("0. Назад в Главное меню.");
         System.out.println("q. Выход.");
@@ -536,13 +536,14 @@ public class Menu {
     }
 
  
-    /*public boolean PrizeAddNew() {
+    public boolean PrizeAddNew() {
         DrawingModel drawingModel = new DrawingModel();
-        drawingModel.PrizeAddNew();
-        return true;
+        if (drawingModel.PrizesToAwardAddNew())
+            return true;
+        return false;
     }
 
-    
+    /* 
     public boolean PrizeSetAsAwarded() {
         return ShowNewChoice;
         
