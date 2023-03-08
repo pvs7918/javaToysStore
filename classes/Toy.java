@@ -61,4 +61,7 @@ public class Toy {
                 ", price=" + price + ", weight=" + weight + "]";
     }
    
+    public String toStringAsPrize() {
+        return "[id=" + id + ", name=" + name + ", price=" + price + "]";
+    }
 }
