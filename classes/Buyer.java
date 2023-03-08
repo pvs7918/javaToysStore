@@ -39,4 +39,7 @@ public class Buyer {
                 checkNumber + ", phone=" + phone + "]";
     }
 
+    public String toSavePrize() {
+        return id + ";" + fullName + ";" + checkNumber + ";" + phone;
+    }
 }

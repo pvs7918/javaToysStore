@@ -64,4 +64,8 @@ public class Toy {
     public String toStringAsPrize() {
         return "[id=" + id + ", name=" + name + ", price=" + price + "]";
     }
+
+    public String toSavePrize() {
+        return id + ";" + name + ";" + price;
+    }
 }

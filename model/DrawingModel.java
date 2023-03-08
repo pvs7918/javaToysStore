@@ -75,42 +75,118 @@ public class DrawingModel {
             System.out.println(item.toString());
         }
     }
-/* 
-    public boolean PrizeAddNew() {
+ 
+    public boolean PrizesToAwardAddNew() {
         // Розыгрыш очередного приза
         
         loadPrizesToAward(); //обновить данные по разыгранным призам
+        //List<Prize> PrizesToAward = drw.getPrizesToAward(); //список призов для вручения
+
         ToysModel toysModel = new ToysModel();
-        if (toysModel.load()) {
-            toysModel.getRandomToyByWeight();
+        if (!toysModel.load()) {
+            return false;
         }
-
+        //Получаем случайную игрушку с учетом веса и количества > 0
+        Toy RandomToy = toysModel.getRandomToyByWeight();
+        if (RandomToy == null) {
+            System.out.println("Ошибка. Приз не выбран!");
+            return false;
+        }
+        
         //загрузить список покупателей
-
-        //Выбираем сначала покупателей, которые уже получили призы
-        // для их исключения - чтобы не было у одного покупателя нескольких призов
-        for (Prize buAwarded : drw.getPrizesToAward()) {
-            buAwarded.getBuyer()
+        BuyersModel buyersModel = new BuyersModel();
+        if (!buyersModel.load()) {
+            return false;
         }
-        
+        //полный список покупателей
+        List<Buyer> buyersAll = buyersModel.getBuyersAll();
+        //инициализация списка покупателей без призов
+        List<Buyer> buyersNotAwarded = new LinkedList<>();
+        // Из общего списка исключаем получивших призы
+        for (Buyer buyer : buyersAll) {
+            boolean isPresent = false;
+            //drw.getPrizesToAward() - список покупателей с призами
+            for (Prize prize : drw.getPrizesToAward()) {
+                if (buyer.getId() == prize.getBuyer().getId()) {
+                    isPresent = true;
+                    break;
+                }
+            }
+            //если покупателя нет в списке награжденных, то добавляем его в buyersNotAwarded
+            if (!isPresent) {
+                buyersNotAwarded.add(buyer);
+            }
+        }
 
-        //List<Buyer> buAwarded = getRandomNotAwardedBuyer();
+        if (buyersNotAwarded.size()==0) {
+            System.out.println("Приз не может быть выбран. Больше нет покупателей без призов!");
+            return false;
+        }
 
-        // Выбор случайным образом покупателя, который ещё не получал приза
-
-        //Выбор игрушки для приза
-        //сначала кандидатов сформировать количество игрушек > 0.
-
-        //Запись нового приза в таблицу призов для выдачи.
-        
+        // Выбор случайного покупателя, без приза
+        int RndNumber = new Random().nextInt(buyersNotAwarded.size());
+        Buyer RandomBuyer = buyersNotAwarded.get(RndNumber);
+        //получаем идентификатор для новой записи приза        
+        int NewId = getPrizesToAwardNewId();
+        //создаем новый объект - приз для вручения
+        Prize newPrize = new Prize(NewId, RandomBuyer, RandomToy);
+        //добавляем новый приз в таблицу призов для выдачи.
+        drw.getPrizesToAward().add(newPrize);
+        //сохраняем список в файл
+        //drw.setPrizesToAward(PrizesToAward);
+        if (!savePrizesToAward()) {
+            System.out.println("Ошибка при сохранении списка призов для вручения!");
+            return false;
+        }
         //В таблице игрушек, количество уменьшить на -1
-        
-        //В таблице покупателей удалить выбранного,
-        //чтобы он не получил несколько призов
+        RandomToy.setCount(RandomToy.getCount()-1);
+        //Обновить данные об игрушках
+        toysModel.save();
 
+        System.out.println("Новый приз успешно разыгран! id=" + NewId + ". Смотрите таблицу разыгранных призов.");
         return true;
     }
-    
+
+    public boolean savePrizesToAward() {
+        // сохранение списка в файл БД
+        try {
+            FileWriter fr1 = new FileWriter(fnamePrizesToAward);
+            //записываем шапку таблицы
+            fr1.append("id|Buyer=id;fullName;checkNumber;phone|Toy=id;name;price\n");
+            //основная таблица
+            for (Prize item : drw.getPrizesToAward()) {
+                fr1.append(item.getId() + "|" +
+                        item.getBuyer().toSavePrize() + "|" +
+                        item.getToy().toSavePrize() + "\n");
+            }
+            fr1.close();
+            return true;
+        } catch (Exception ex) {
+            System.out.println(ex.toString());
+            return false;
+        }
+    }
+
+
+    public int getPrizesToAwardNewId() {
+        int maxId = -1;
+        for (Prize item : drw.getPrizesToAward()) {
+            if (item.getId() > maxId)
+                maxId = item.getId();
+        }
+        return maxId + 1;
+    }
+
+    public int getPrizesAwardedNewId() {
+        int maxId = -1;
+        for (Prize item : drw.getPrizesAwarded()) {
+            if (item.getId() > maxId)
+                maxId = item.getId();
+        }
+        return maxId + 1;
+    }
+
+    /* 
    PrizesToAwardShowAll
     PrizeSetAsAwarded
     PrizesAwardedShowAll
@@ -129,26 +205,7 @@ public class DrawingModel {
         return false;
     }
 
-    public boolean save() {
-        // сохранение списка в файл БД
-        try {
-            FileWriter fr1 = new FileWriter(fnameBuyers);
-            //записываем шапку таблицы
-            fr1.append("id;fullName;checkNumber;phone\n");
-            //основная таблица
-            for (Buyer item : buyers) {
-                fr1.append(item.getId() + ";" +
-                        item.getFullName() + ";" +
-                        item.getCheckNumber() + ";" +
-                        item.getPhone() + "\n");
-            }
-            fr1.close();
-            return true;
-        } catch (Exception ex) {
-            System.out.println(ex.toString());
-            return false;
-        }
-    }*/
+    */
 
     
     // возврат полного списка студентов без фильтрации и доп.упорядочивания
@@ -156,14 +213,7 @@ public class DrawingModel {
         return buyers;
     }
 
-    public int getNewId() {
-        int maxId = -1;
-        for (Buyer item : buyers) {
-            if (item.getId() > maxId)
-                maxId = item.getId();
-        }
-        return maxId + 1;
-    }
+    
 
     public Buyer getBuyerById(int curBuyerId) {
         for (Buyer item : buyers) {
